@@ -12,7 +12,6 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
   const [selectedSport, setSelectedSport] = useState("");
   const [gameDate, setGameDate] = useState("");
   const [gameTime, setGameTime] = useState("");
-  const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [team1Name, setTeam1Name] = useState("");
   const [team2Name, setTeam2Name] = useState("");
@@ -51,14 +50,7 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
   };
 
   const handleCreateGame = async () => {
-    if (
-      !selectedSport ||
-      !gameDate ||
-      !gameTime ||
-      !location ||
-      !team1Name ||
-      !team2Name
-    ) {
+    if (!selectedSport || !gameDate || !gameTime || !team1Name || !team2Name) {
       alert("Please fill in all required fields");
       return;
     }
@@ -74,7 +66,7 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
     setSelectedSport("");
     setGameDate("");
     setGameTime("");
-    setLocation("");
+
     setDescription("");
     setTeam1Name("");
     setTeam2Name("");
@@ -155,21 +147,6 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
                     </div>
                   </div>
 
-                  {/* Location */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Location *
-                    </label>
-                    <input
-                      type="text"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      placeholder="e.g., City Sports Complex"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  {/* Team Names */}
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">

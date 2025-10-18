@@ -5,13 +5,18 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface LoginFormProps {
   onToggleMode: () => void;
+  onClose: () => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({
+  onToggleMode,
+  onClose,
+}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const { signIn, signInWithGoogle } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,6 +26,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
 
     try {
       await signIn(email, password);
+      setSuccess(true);
+      setTimeout(() => {
+        onClose(); // Close modal after successful login
+      }, 1000); // Show success message for 1 second
     } catch (error: any) {
       setError(error.message || "Failed to sign in");
     } finally {
@@ -33,6 +42,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
     setLoading(true);
     try {
       await signInWithGoogle();
+      setSuccess(true);
+      setTimeout(() => {
+        onClose(); // Close modal after successful Google login
+      }, 1000); // Show success message for 1 second
     } catch (error: any) {
       setError(error.message || "Failed to sign in with Google");
     } finally {
@@ -49,6 +62,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          Successfully signed in! Redirecting...
         </div>
       )}
 

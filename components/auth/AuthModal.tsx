@@ -37,9 +37,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         </button>
 
         {isLogin ? (
-          <LoginForm onToggleMode={() => setIsLogin(false)} />
+          <LoginForm onToggleMode={() => setIsLogin(false)} onClose={onClose} />
         ) : (
-          <SignupForm onToggleMode={() => setIsLogin(true)} />
+          <SignupForm onToggleMode={() => setIsLogin(true)} onClose={onClose} />
         )}
       </div>
     </div>

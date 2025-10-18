@@ -323,9 +323,7 @@ export const MyTeams: React.FC<MyTeamsProps> = ({ currentUserId }) => {
                           <p className="text-sm text-gray-600 mb-1">
                             📅 {formatDate(game.startTime)}
                           </p>
-                          <p className="text-sm text-gray-600 mb-1">
-                            📍 {game.location}
-                          </p>
+
                           {game.description && (
                             <p className="text-sm text-gray-600">
                               {game.description}
@@ -413,9 +411,7 @@ export const MyTeams: React.FC<MyTeamsProps> = ({ currentUserId }) => {
                           <p className="text-sm text-gray-600 mb-1">
                             📅 {formatDate(game.startTime)}
                           </p>
-                          <p className="text-sm text-gray-600 mb-1">
-                            📍 {game.location}
-                          </p>
+
                           {game.description && (
                             <p className="text-sm text-gray-600">
                               {game.description}

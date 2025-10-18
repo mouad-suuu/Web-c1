@@ -23,7 +23,7 @@ export interface User {
   lastName: string;
   email: string;
   password: string;
-  location?: string;
+
   bio?: string;
   sports?: string[];
 }
@@ -42,7 +42,7 @@ export interface Game {
   team2: Team;
   startTime: Timestamp;
   period: number; // duration in hours
-  location: string;
+
   status: "waiting" | "in-progress" | "completed" | "cancelled";
   description?: string;
   createdAt: Timestamp;

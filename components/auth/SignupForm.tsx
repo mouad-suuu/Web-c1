@@ -5,9 +5,13 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface SignupFormProps {
   onToggleMode: () => void;
+  onClose: () => void;
 }
 
-export const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
+export const SignupForm: React.FC<SignupFormProps> = ({
+  onToggleMode,
+  onClose,
+}) => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -16,6 +20,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const { signUp, signInWithGoogle } = useAuth();
 
   const handleChange = (
@@ -45,6 +50,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
 
     try {
       await signUp(formData.email, formData.password, formData.username);
+      setSuccess(true);
+      setTimeout(() => {
+        onClose(); // Close modal after successful signup
+      }, 1000); // Show success message for 1 second
     } catch (error: any) {
       setError(error.message || "Failed to create account");
     } finally {
@@ -57,6 +66,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
     setLoading(true);
     try {
       await signInWithGoogle();
+      setSuccess(true);
+      setTimeout(() => {
+        onClose(); // Close modal after successful Google signup
+      }, 1000); // Show success message for 1 second
     } catch (error: any) {
       setError(error.message || "Failed to sign in with Google");
     } finally {
@@ -73,6 +86,12 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          Account created successfully! Redirecting...
         </div>
       )}
 

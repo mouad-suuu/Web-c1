@@ -245,15 +245,6 @@ export const AvailableGames: React.FC<AvailableGamesProps> = ({
                     </span>
                   </div>
 
-                  <div className="mb-4">
-                    <p className="text-gray-600 mb-2">📍 {game.location}</p>
-                    {game.description && (
-                      <p className="text-gray-600 text-sm">
-                        {game.description}
-                      </p>
-                    )}
-                  </div>
-
                   {/* Teams */}
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="bg-gray-50 rounded-lg p-4">
