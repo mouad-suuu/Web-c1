@@ -129,15 +129,12 @@ export async function deleteUser(username: string): Promise<void> {
 
 // ✅ Get all games
 export async function getGames(): Promise<Game[]> {
-  console.log("🔍 [getGames] Starting to fetch games from Firebase...");
   try {
     const q = query(gamesCol, orderBy("startTime", "asc"));
     const snapshot = await getDocs(q);
-    const games = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    console.log(`✅ [getGames] Successfully fetched ${games.length} games:`, games);
-    return games;
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
-    console.error("❌ [getGames] Error getting games:", error);
+    console.error("Error getting games:", error);
     return [];
   }
 }
@@ -157,7 +154,6 @@ export async function getGamesByStatus(
 
 // ✅ Get games where user is participating
 export async function getUserGames(userId: string): Promise<Game[]> {
-  console.log(`🔍 [getUserGames] Starting to fetch games for user: ${userId}`);
   try {
     // Get all games and filter client-side to avoid complex queries
     const snapshot = await getDocs(gamesCol);
@@ -165,7 +161,6 @@ export async function getUserGames(userId: string): Promise<Game[]> {
       id: doc.id,
       ...doc.data(),
     }));
-    console.log(`📊 [getUserGames] Found ${allGames.length} total games`);
 
     // Filter games where user is in either team (with proper error handling)
     const userGames = allGames.filter((game) => {
@@ -173,46 +168,34 @@ export async function getUserGames(userId: string): Promise<Game[]> {
         // Check if team1 and team2 exist and have players arrays
         const team1Players = game.team1?.players || [];
         const team2Players = game.team2?.players || [];
-        
-        console.log(`🔍 [getUserGames] Checking game ${game.id}:`, {
-          team1Players: team1Players.length,
-          team2Players: team2Players.length,
-          team1PlayerIds: team1Players.map(p => p?.id),
-          team2PlayerIds: team2Players.map(p => p?.id)
-        });
 
-        const isInTeam1 = team1Players.some((player) => player?.id === userId);
-        const isInTeam2 = team2Players.some((player) => player?.id === userId);
-        
-        console.log(`🎯 [getUserGames] User ${userId} in game ${game.id}: team1=${isInTeam1}, team2=${isInTeam2}`);
-        
-        return isInTeam1 || isInTeam2;
+        return (
+          team1Players.some((player) => player?.id === userId) ||
+          team2Players.some((player) => player?.id === userId)
+        );
       } catch (error) {
-        console.warn("⚠️ [getUserGames] Error filtering game:", error, game);
+        console.warn("Error filtering game:", error, game);
         return false;
       }
     });
-
-    console.log(`✅ [getUserGames] Found ${userGames.length} games for user ${userId}`);
 
     // Sort by start time
     return userGames.sort((a, b) => {
       try {
         return a.startTime.toMillis() - b.startTime.toMillis();
       } catch (error) {
-        console.warn("⚠️ [getUserGames] Error sorting games:", error);
+        console.warn("Error sorting games:", error);
         return 0;
       }
     });
   } catch (error) {
-    console.error("❌ [getUserGames] Error getting user games:", error);
+    console.error("Error getting user games:", error);
     return [];
   }
 }
 
 // ✅ Get games created by user
 export async function getGamesByLeader(leaderId: string): Promise<Game[]> {
-  console.log(`🔍 [getGamesByLeader] Starting to fetch games created by leader: ${leaderId}`);
   try {
     // For now, get all games and filter client-side to avoid index requirements
     const snapshot = await getDocs(gamesCol);
@@ -220,33 +203,28 @@ export async function getGamesByLeader(leaderId: string): Promise<Game[]> {
       id: doc.id,
       ...doc.data(),
     }));
-    console.log(`📊 [getGamesByLeader] Found ${allGames.length} total games`);
 
     // Filter games where the leader ID matches (with proper error handling)
     const userGames = allGames.filter((game) => {
       try {
-        const isLeader = game.leader?.id === leaderId;
-        console.log(`🔍 [getGamesByLeader] Game ${game.id} leader: ${game.leader?.id}, matches: ${isLeader}`);
-        return isLeader;
+        return game.leader?.id === leaderId;
       } catch (error) {
-        console.warn("⚠️ [getGamesByLeader] Error filtering game by leader:", error, game);
+        console.warn("Error filtering game by leader:", error, game);
         return false;
       }
     });
-
-    console.log(`✅ [getGamesByLeader] Found ${userGames.length} games created by leader ${leaderId}`);
 
     // Sort by start time
     return userGames.sort((a, b) => {
       try {
         return a.startTime.toMillis() - b.startTime.toMillis();
       } catch (error) {
-        console.warn("⚠️ [getGamesByLeader] Error sorting games by leader:", error);
+        console.warn("Error sorting games by leader:", error);
         return 0;
       }
     });
   } catch (error) {
-    console.error("❌ [getGamesByLeader] Error getting games by leader:", error);
+    console.error("Error getting games by leader:", error);
     return [];
   }
 }
