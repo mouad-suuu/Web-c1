@@ -1,9 +1,17 @@
 # 13 Teams
 
-## Discription
+## Description
 
-    - a paltform to make teams for 1337 students.
-    - should handle creating teams to engaje in games, sport matchs etc
-    - the leader user can add his friends to the team and his the only one    with the privlage to do so
+A platform designed for 1337 students to create and manage teams for various activities.
 
-## Stack: Next.js + 42 API
+### Key Features
+
+- Team creation and management system
+- Support for organizing games and sports matches
+- Team leader privileges for member management
+- Secure team management with role-based access control
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js
+- **Authentication**: 42 API
