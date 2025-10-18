@@ -52,8 +52,8 @@ export const SignupForm: React.FC<SignupFormProps> = ({
       await signUp(formData.email, formData.password, formData.username);
       setSuccess(true);
       setTimeout(() => {
-        onClose(); // Close modal after successful signup
-      }, 1000); // Show success message for 1 second
+        onClose();
+      }, 1000);
     } catch (error: any) {
       setError(error.message || "Failed to create account");
     } finally {
@@ -68,8 +68,8 @@ export const SignupForm: React.FC<SignupFormProps> = ({
       await signInWithGoogle();
       setSuccess(true);
       setTimeout(() => {
-        onClose(); // Close modal after successful Google signup
-      }, 1000); // Show success message for 1 second
+        onClose();
+      }, 1000);
     } catch (error: any) {
       setError(error.message || "Failed to sign in with Google");
     } finally {

@@ -28,8 +28,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       await signIn(email, password);
       setSuccess(true);
       setTimeout(() => {
-        onClose(); // Close modal after successful login
-      }, 1000); // Show success message for 1 second
+        onClose();
+      }, 1000);
     } catch (error: any) {
       setError(error.message || "Failed to sign in");
     } finally {
@@ -44,8 +44,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       await signInWithGoogle();
       setSuccess(true);
       setTimeout(() => {
-        onClose(); // Close modal after successful Google login
-      }, 1000); // Show success message for 1 second
+        onClose();
+      }, 1000);
     } catch (error: any) {
       setError(error.message || "Failed to sign in with Google");
     } finally {

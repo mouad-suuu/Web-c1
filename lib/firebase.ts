@@ -12,13 +12,9 @@ const firebaseConfig = {
   measurementId: "G-QW5244TR3M",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(app);
 
-// Initialize Cloud Firestore and get a reference to the service
 export const db = getFirestore(app);
 
 export default app;

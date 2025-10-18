@@ -43,7 +43,6 @@ const Timer: React.FC<TimerProps> = ({ targetDate, label }) => {
     return () => clearInterval(timer);
   }, [targetDate, mounted]);
 
-  // Don't render timer until mounted to prevent hydration mismatch
   if (!mounted) {
     return (
       <div className="text-center">
@@ -73,17 +72,14 @@ export const AvailableGames: React.FC<AvailableGamesProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load games from Firebase
   useEffect(() => {
     const fetchGames = async () => {
       try {
         setLoading(true);
         const fetchedGames = await getGames();
 
-        // Filter out any games with invalid data structure
         const validGames = fetchedGames.filter((game) => {
           try {
-            // Check if game has required properties
             return (
               game &&
               game.team1 &&
@@ -112,13 +108,10 @@ export const AvailableGames: React.FC<AvailableGamesProps> = ({
 
   const handleJoinTeam = async (gameId: string, teamNumber: 1 | 2) => {
     try {
-      // Get current user data
       const currentUser = await getUserById(currentUserId);
 
-      // Join the team in Firebase
       await joinTeam(gameId, teamNumber, currentUser);
 
-      // Refresh games list
       const updatedGames = await getGames();
       setGames(updatedGames);
 

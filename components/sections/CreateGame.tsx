@@ -33,7 +33,6 @@ export const CreateGame: React.FC<CreateGameProps> = ({
       !selectedFriends.find((friend) => friend.username === user.username)
   );
 
-  //useffect to load users using database getusers
   useEffect(() => {
     const fetchUsers = async () => {
       const fetchedUsers: User[] = await getUsers();
@@ -62,14 +61,11 @@ export const CreateGame: React.FC<CreateGameProps> = ({
     setIsCreating(true);
 
     try {
-      // Get current user data
       const currentUser = await getUserById(currentUserId);
 
-      // Create start time from date and time
       const startDateTime = new Date(`${gameDate}T${gameTime}`);
       const startTime = Timestamp.fromDate(startDateTime);
 
-      // Create the game data
       const gameData = {
         sport: selectedSportData?.name || selectedSport,
         leader: currentUser,
@@ -84,17 +80,15 @@ export const CreateGame: React.FC<CreateGameProps> = ({
           maxPlayers: maxPlayers,
         },
         startTime: startTime,
-        period: 2, // Default 2 hours duration
+        period: 2,
         status: "waiting" as const,
         description: description || undefined,
       };
 
-      // Create the game in the database
       await createGame(gameData);
 
       alert("Game created successfully!");
 
-      // Reset form
       setSelectedSport("");
       setGameDate("");
       setGameTime("");
@@ -104,7 +98,6 @@ export const CreateGame: React.FC<CreateGameProps> = ({
       setMaxPlayers(5);
       setSelectedFriends([]);
 
-      // Notify parent component to refresh games list
       if (onGameCreated) {
         onGameCreated();
       }

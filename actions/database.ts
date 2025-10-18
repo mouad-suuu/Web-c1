@@ -20,12 +20,10 @@ import { UserProfile } from "@/lib/auth";
 export interface User {
   id: string;
   username: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   password: string;
-
-  bio?: string;
   sports?: string[];
 }
 
@@ -42,7 +40,7 @@ export interface Game {
   team1: Team;
   team2: Team;
   startTime: Timestamp;
-  period: number; // duration in hours
+  period: number;
 
   status: "waiting" | "in-progress" | "completed" | "cancelled";
   description?: string;
@@ -67,7 +65,6 @@ const teamHistoryCol = collection(
   "teamHistory"
 ) as CollectionReference<TeamHistory>;
 
-// Helper function to convert UserProfile to database User
 export function convertUserProfileToUser(userProfile: UserProfile): User {
   return {
     id: userProfile.id,
@@ -75,16 +72,13 @@ export function convertUserProfileToUser(userProfile: UserProfile): User {
     firstName: userProfile.username.split(" ")[0] || userProfile.username,
     lastName: userProfile.username.split(" ").slice(1).join(" ") || "",
     email: userProfile.email,
-    password: "", // Not needed for database operations
-    bio: "",
+    password: "",
     sports: userProfile.sports || [],
   };
 }
 
-// Helper function to get user by ID (converts from auth UserProfile)
 export async function getUserById(userId: string): Promise<User> {
   try {
-    // First try to get from users collection
     const userRef = doc(usersCol, userId);
     const userDoc = await getDoc(userRef);
 
@@ -92,7 +86,6 @@ export async function getUserById(userId: string): Promise<User> {
       return userDoc.data() as User;
     }
 
-    // If not found, try to get from auth profile and convert
     const { getUserProfile } = await import("@/lib/auth");
     const userProfile = await getUserProfile(userId);
 
@@ -150,11 +143,6 @@ export async function deleteUser(username: string): Promise<void> {
   await deleteDoc(ref);
 }
 
-// ================================
-// 🎮 GAMES FUNCTIONS
-// ================================
-
-// ✅ Get all games
 export async function getGames(): Promise<Game[]> {
   try {
     const q = query(gamesCol, orderBy("startTime", "asc"));
@@ -166,7 +154,6 @@ export async function getGames(): Promise<Game[]> {
   }
 }
 
-// ✅ Get games by status
 export async function getGamesByStatus(
   status: Game["status"]
 ): Promise<Game[]> {
@@ -179,20 +166,16 @@ export async function getGamesByStatus(
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
-// ✅ Get games where user is participating
 export async function getUserGames(userId: string): Promise<Game[]> {
   try {
-    // Get all games and filter client-side to avoid complex queries
     const snapshot = await getDocs(gamesCol);
     const allGames = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
 
-    // Filter games where user is in either team (with proper error handling)
     const userGames = allGames.filter((game) => {
       try {
-        // Check if team1 and team2 exist and have players arrays
         const team1Players = game.team1?.players || [];
         const team2Players = game.team2?.players || [];
 
@@ -206,7 +189,6 @@ export async function getUserGames(userId: string): Promise<Game[]> {
       }
     });
 
-    // Sort by start time
     return userGames.sort((a, b) => {
       try {
         return a.startTime.toMillis() - b.startTime.toMillis();
@@ -221,17 +203,14 @@ export async function getUserGames(userId: string): Promise<Game[]> {
   }
 }
 
-// ✅ Get games created by user
 export async function getGamesByLeader(leaderId: string): Promise<Game[]> {
   try {
-    // For now, get all games and filter client-side to avoid index requirements
     const snapshot = await getDocs(gamesCol);
     const allGames = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
 
-    // Filter games where the leader ID matches (with proper error handling)
     const userGames = allGames.filter((game) => {
       try {
         return game.leader?.id === leaderId;
@@ -241,7 +220,6 @@ export async function getGamesByLeader(leaderId: string): Promise<Game[]> {
       }
     });
 
-    // Sort by start time
     return userGames.sort((a, b) => {
       try {
         return a.startTime.toMillis() - b.startTime.toMillis();
@@ -256,7 +234,6 @@ export async function getGamesByLeader(leaderId: string): Promise<Game[]> {
   }
 }
 
-// ✅ Create new game
 export async function createGame(
   gameData: Omit<Game, "id" | "createdAt">
 ): Promise<Game> {
@@ -269,7 +246,6 @@ export async function createGame(
   return { id: docRef.id, ...gameWithTimestamp };
 }
 
-// ✅ Update game
 export async function updateGame(
   gameId: string,
   updates: Partial<Game>
@@ -278,7 +254,6 @@ export async function updateGame(
   await updateDoc(ref, updates as DocumentData);
 }
 
-// ✅ Join team in game
 export async function joinTeam(
   gameId: string,
   teamNumber: 1 | 2,
@@ -298,7 +273,6 @@ export async function joinTeam(
     throw new Error("Team is full");
   }
 
-  // Check if user is already in the team
   if (team.players.some((player) => player.id === user.id)) {
     throw new Error("User is already in this team");
   }
@@ -314,29 +288,24 @@ export async function joinTeam(
   await updateDoc(gameRef, updates);
 }
 
-// ✅ Delete game
 export async function deleteGame(gameId: string): Promise<void> {
   const ref = doc(gamesCol, gameId);
   await deleteDoc(ref);
 }
 export async function getTeamHistory(userId: string): Promise<TeamHistory[]> {
-  // Get all team history and filter client-side to avoid complex queries
   const snapshot = await getDocs(teamHistoryCol);
   const allHistory = snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
   }));
 
-  // Filter history where user is in the players array
   const userHistory = allHistory.filter((history) =>
     history.players.some((player) => player.id === userId)
   );
 
-  // Sort by date (most recent first)
   return userHistory.sort((a, b) => b.date.toMillis() - a.date.toMillis());
 }
 
-// ✅ Create team history record
 export async function createTeamHistory(
   historyData: Omit<TeamHistory, "id">
 ): Promise<TeamHistory> {
@@ -344,7 +313,6 @@ export async function createTeamHistory(
   return { id: docRef.id, ...historyData };
 }
 
-// ✅ Update team history
 export async function updateTeamHistory(
   historyId: string,
   updates: Partial<TeamHistory>
@@ -353,7 +321,6 @@ export async function updateTeamHistory(
   await updateDoc(ref, updates as DocumentData);
 }
 
-// ✅ Delete team history
 export async function deleteTeamHistory(historyId: string): Promise<void> {
   const ref = doc(teamHistoryCol, historyId);
   await deleteDoc(ref);

@@ -33,12 +33,10 @@ export const signUp = async (
     );
     const user = userCredential.user;
 
-    // Update the user's display name
     await updateProfile(user, {
       displayName: username,
     });
 
-    // Create user profile in Firestore
     const userProfile: UserProfile = {
       id: user.uid,
       username: username,
@@ -56,7 +54,6 @@ export const signUp = async (
   }
 };
 
-// Sign in with email and password
 export const signIn = async (
   email: string,
   password: string
@@ -74,14 +71,12 @@ export const signIn = async (
   }
 };
 
-// Sign in with Google
 export const signInWithGoogle = async (): Promise<User> => {
   try {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Check if user profile exists, if not create one
     const userDoc = await getDoc(doc(db, "users", user.uid));
     if (!userDoc.exists()) {
       const userProfile: UserProfile = {
@@ -101,7 +96,6 @@ export const signInWithGoogle = async (): Promise<User> => {
   }
 };
 
-// Sign out
 export const signOutUser = async (): Promise<void> => {
   try {
     await signOut(auth);
@@ -111,7 +105,6 @@ export const signOutUser = async (): Promise<void> => {
   }
 };
 
-// Get user profile from Firestore
 export const getUserProfile = async (
   uid: string
 ): Promise<UserProfile | null> => {
@@ -127,7 +120,6 @@ export const getUserProfile = async (
   }
 };
 
-// Listen to authentication state changes
 export const onAuthStateChange = (callback: (user: User | null) => void) => {
   return onAuthStateChanged(auth, callback);
 };

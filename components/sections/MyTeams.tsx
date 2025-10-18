@@ -23,13 +23,11 @@ export const MyTeams: React.FC<MyTeamsProps> = ({ currentUserId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load data from Firebase
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
 
-        // Fetch all data in parallel
         const [history, upcoming, created] = await Promise.all([
           getTeamHistory(currentUserId),
           getUserGames(currentUserId),
@@ -221,11 +219,11 @@ export const MyTeams: React.FC<MyTeamsProps> = ({ currentUserId }) => {
                               >
                                 <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
                                   <span className="text-xs font-medium text-blue-600">
-                                    {player.firstName.charAt(0)}
+                                    {player.firstName?.charAt(0)}
                                   </span>
                                 </div>
                                 <span className="text-sm text-gray-700">
-                                  {player.firstName} {player.lastName}
+                                  {player?.firstName} {player?.lastName}
                                 </span>
                               </div>
                             ))}
