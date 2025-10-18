@@ -1,14 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
-import { sports } from "@/data/mockData";
-import { getUsers, User } from "@/actions/database";
-import { Sport } from "@/data/mockData";
+import { sports } from "@/data/sports";
+import { getUsers, User, createGame, getUserById } from "@/actions/database";
+import { Timestamp } from "firebase/firestore";
 
 interface CreateGameProps {
   currentUserId: string;
+  onGameCreated?: () => void;
 }
 
-export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
+export const CreateGame: React.FC<CreateGameProps> = ({
+  currentUserId,
+  onGameCreated,
+}) => {
   const [selectedSport, setSelectedSport] = useState("");
   const [gameDate, setGameDate] = useState("");
   const [gameTime, setGameTime] = useState("");
@@ -57,22 +61,59 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
 
     setIsCreating(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      // Get current user data
+      const currentUser = await getUserById(currentUserId);
 
-    alert("Game created successfully!");
+      // Create start time from date and time
+      const startDateTime = new Date(`${gameDate}T${gameTime}`);
+      const startTime = Timestamp.fromDate(startDateTime);
 
-    // Reset form
-    setSelectedSport("");
-    setGameDate("");
-    setGameTime("");
+      // Create the game data
+      const gameData = {
+        sport: selectedSportData?.name || selectedSport,
+        leader: currentUser,
+        team1: {
+          name: team1Name,
+          players: [currentUser, ...selectedFriends],
+          maxPlayers: maxPlayers,
+        },
+        team2: {
+          name: team2Name,
+          players: [],
+          maxPlayers: maxPlayers,
+        },
+        startTime: startTime,
+        period: 2, // Default 2 hours duration
+        status: "waiting" as const,
+        description: description || undefined,
+      };
 
-    setDescription("");
-    setTeam1Name("");
-    setTeam2Name("");
-    setMaxPlayers(5);
-    setSelectedFriends([]);
-    setIsCreating(false);
+      // Create the game in the database
+      await createGame(gameData);
+
+      alert("Game created successfully!");
+
+      // Reset form
+      setSelectedSport("");
+      setGameDate("");
+      setGameTime("");
+      setDescription("");
+      setTeam1Name("");
+      setTeam2Name("");
+      setMaxPlayers(5);
+      setSelectedFriends([]);
+
+      // Notify parent component to refresh games list
+      if (onGameCreated) {
+        onGameCreated();
+      }
+    } catch (error) {
+      console.error("Error creating game:", error);
+      alert(error instanceof Error ? error.message : "Failed to create game");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const selectedSportData = sports.find((sport) => sport.id === selectedSport);

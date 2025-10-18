@@ -7,7 +7,6 @@ import {
   getUserGames,
   getGamesByLeader,
 } from "@/actions/database";
-import { mockTeamHistory, mockGames } from "@/data/mockData";
 
 interface MyTeamsProps {
   currentUserId: string;
@@ -37,43 +36,12 @@ export const MyTeams: React.FC<MyTeamsProps> = ({ currentUserId }) => {
           getGamesByLeader(currentUserId),
         ]);
 
-        // Use mock data as fallback if Firebase data is empty or invalid
-        setTeamHistory(history.length > 0 ? history : (mockTeamHistory as any));
-        setUpcomingGames(
-          upcoming.length > 0
-            ? upcoming
-            : (mockGames.filter(
-                (game) =>
-                  game.team1.players.some(
-                    (player) => player.id === currentUserId
-                  ) ||
-                  game.team2.players.some(
-                    (player) => player.id === currentUserId
-                  )
-              ) as any)
-        );
-        setCreatedGames(
-          created.length > 0
-            ? created
-            : (mockGames.filter(
-                (game) => game.leader.id === currentUserId
-              ) as any)
-        );
+        setTeamHistory(history);
+        setUpcomingGames(upcoming);
+        setCreatedGames(created);
       } catch (err) {
-        console.log("Error fetching from Firebase, using mock data:", err);
-        setTeamHistory(mockTeamHistory as any);
-        setUpcomingGames(
-          mockGames.filter(
-            (game) =>
-              game.team1.players.some(
-                (player) => player.id === currentUserId
-              ) ||
-              game.team2.players.some((player) => player.id === currentUserId)
-          ) as any
-        );
-        setCreatedGames(
-          mockGames.filter((game) => game.leader.id === currentUserId) as any
-        );
+        console.error("Error fetching data from database:", err);
+        setError("Failed to load your teams data. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -253,11 +221,11 @@ export const MyTeams: React.FC<MyTeamsProps> = ({ currentUserId }) => {
                               >
                                 <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
                                   <span className="text-xs font-medium text-blue-600">
-                                    {player.name.charAt(0)}
+                                    {player.firstName.charAt(0)}
                                   </span>
                                 </div>
                                 <span className="text-sm text-gray-700">
-                                  {player.name}
+                                  {player.firstName} {player.lastName}
                                 </span>
                               </div>
                             ))}

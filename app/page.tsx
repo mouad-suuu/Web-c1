@@ -1,4 +1,5 @@
 "use client";
+import { useState, useCallback } from "react";
 import { AvailableGames } from "@/components/sections/AvailableGames";
 import { CreateGame } from "@/components/sections/CreateGame";
 import { MyTeams } from "@/components/sections/MyTeams";
@@ -7,6 +8,11 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function Home() {
   const { user, loading } = useAuth();
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleGameCreated = useCallback(() => {
+    setRefreshKey((prev) => prev + 1);
+  }, []);
 
   if (loading) {
     return (
@@ -64,9 +70,12 @@ export default function Home() {
             </div>
           }
         >
-          <AvailableGames currentUserId={user.uid} />
-          <CreateGame currentUserId={user.uid} />
-          <MyTeams currentUserId={user.uid} />
+          <AvailableGames key={refreshKey} currentUserId={user.uid} />
+          <CreateGame
+            currentUserId={user.uid}
+            onGameCreated={handleGameCreated}
+          />
+          <MyTeams key={refreshKey} currentUserId={user.uid} />
         </ClientOnly>
       </main>
     </div>

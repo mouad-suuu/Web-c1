@@ -15,6 +15,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { UserProfile } from "@/lib/auth";
 
 export interface User {
   id: string;
@@ -65,6 +66,46 @@ const teamHistoryCol = collection(
   db,
   "teamHistory"
 ) as CollectionReference<TeamHistory>;
+
+// Helper function to convert UserProfile to database User
+export function convertUserProfileToUser(userProfile: UserProfile): User {
+  return {
+    id: userProfile.id,
+    username: userProfile.username,
+    firstName: userProfile.username.split(" ")[0] || userProfile.username,
+    lastName: userProfile.username.split(" ").slice(1).join(" ") || "",
+    email: userProfile.email,
+    password: "", // Not needed for database operations
+    bio: "",
+    sports: userProfile.sports || [],
+  };
+}
+
+// Helper function to get user by ID (converts from auth UserProfile)
+export async function getUserById(userId: string): Promise<User> {
+  try {
+    // First try to get from users collection
+    const userRef = doc(usersCol, userId);
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists()) {
+      return userDoc.data() as User;
+    }
+
+    // If not found, try to get from auth profile and convert
+    const { getUserProfile } = await import("@/lib/auth");
+    const userProfile = await getUserProfile(userId);
+
+    if (userProfile) {
+      return convertUserProfileToUser(userProfile);
+    }
+
+    throw new Error(`User with ID ${userId} not found`);
+  } catch (error) {
+    console.error("Error getting user by ID:", error);
+    throw error;
+  }
+}
 
 export async function getUsers(): Promise<User[]> {
   const snapshot = await getDocs(usersCol);

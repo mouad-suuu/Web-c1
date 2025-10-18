@@ -20,14 +20,12 @@ export interface UserProfile {
   createdAt: Date;
 }
 
-// Sign up with email and password
 export const signUp = async (
   email: string,
   password: string,
   username: string
 ): Promise<User> => {
   try {
-    // Create user with email and password
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email,

@@ -1,8 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Game, getGames, joinTeam, getUser } from "@/actions/database";
-import { sports } from "@/data/sports";
-import { mockGames } from "@/data/mockData";
+import { Game, getGames, joinTeam, getUserById } from "@/actions/database";
 
 interface TimerProps {
   targetDate: Date;
@@ -100,16 +98,10 @@ export const AvailableGames: React.FC<AvailableGamesProps> = ({
           }
         });
 
-        // If no valid games from Firebase, use mock data as fallback
-        if (validGames.length === 0) {
-          console.log("No games from Firebase, using mock data");
-          setGames(mockGames as any);
-        } else {
-          setGames(validGames);
-        }
+        setGames(validGames);
       } catch (err) {
-        console.log("Error fetching from Firebase, using mock data:", err);
-        setGames(mockGames as any);
+        console.error("Error fetching games from database:", err);
+        setError("Failed to load games. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -121,7 +113,7 @@ export const AvailableGames: React.FC<AvailableGamesProps> = ({
   const handleJoinTeam = async (gameId: string, teamNumber: 1 | 2) => {
     try {
       // Get current user data
-      const currentUser = await getUser(currentUserId);
+      const currentUser = await getUserById(currentUserId);
 
       // Join the team in Firebase
       await joinTeam(gameId, teamNumber, currentUser);
