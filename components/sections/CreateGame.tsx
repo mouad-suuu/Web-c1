@@ -1,6 +1,8 @@
 "use client";
-import { useState } from "react";
-import { User, mockUsers, sports } from "@/data/mockData";
+import { useEffect, useState } from "react";
+import { sports } from "@/data/mockData";
+import { getUsers, User } from "@/actions/database";
+import { Sport } from "@/data/mockData";
 
 interface CreateGameProps {
   currentUserId: string;
@@ -18,16 +20,24 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFriends, setSelectedFriends] = useState<User[]>([]);
   const [isCreating, setIsCreating] = useState(false);
-
+  const [users, setUsers] = useState<User[]>([]);
   const currentUser =
-    mockUsers.find((user) => user.id === currentUserId) || mockUsers[0];
-
-  const filteredUsers = mockUsers.filter(
+    users.find((user) => user.id === currentUserId) || users[0];
+  const filteredUsers = users.filter(
     (user) =>
-      user.id !== currentUserId &&
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !selectedFriends.find((friend) => friend.id === user.id)
+      user.username !== currentUserId &&
+      user.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !selectedFriends.find((friend) => friend.username === user.username)
   );
+
+  //useffect to load users using database getusers
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const fetchedUsers: User[] = await getUsers();
+      setUsers(fetchedUsers);
+    };
+    fetchUsers();
+  }, []);
 
   const handleAddFriend = (friend: User) => {
     setSelectedFriends([...selectedFriends, friend]);
@@ -92,13 +102,12 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
                     Game Details
                   </h3>
 
-                  {/* Sport Selection */}
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Sport *
                     </label>
                     <div className="grid grid-cols-2 gap-2">
-                      {sports.map((sport) => (
+                      {sports.map((sport: any) => (
                         <button
                           key={sport.id}
                           onClick={() => {
@@ -120,7 +129,6 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
                     </div>
                   </div>
 
-                  {/* Date and Time */}
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -171,7 +179,7 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
                         type="text"
                         value={team1Name}
                         onChange={(e) => setTeam1Name(e.target.value)}
-                        placeholder="e.g., Thunder FC"
+                        placeholder="3wapa..."
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -183,13 +191,12 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
                         type="text"
                         value={team2Name}
                         onChange={(e) => setTeam2Name(e.target.value)}
-                        placeholder="e.g., Lightning United"
+                        placeholder="Lm7sada..."
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                   </div>
 
-                  {/* Max Players */}
                   {selectedSportData && (
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -212,7 +219,6 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
                     </div>
                   )}
 
-                  {/* Description */}
                   <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Description
@@ -228,14 +234,12 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
                 </div>
               </div>
 
-              {/* Right Column - Invite Friends */}
               <div className="space-y-6">
                 <div>
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">
                     Invite Friends
                   </h3>
 
-                  {/* Search */}
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Search Friends
@@ -249,7 +253,6 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
                     />
                   </div>
 
-                  {/* Search Results */}
                   {searchQuery && (
                     <div className="mb-4">
                       <h4 className="text-sm font-medium text-gray-700 mb-2">
@@ -264,16 +267,16 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                                 <span className="text-sm font-medium text-blue-600">
-                                  {user.name.charAt(0)}
+                                  {user.username.charAt(0)}
                                 </span>
                               </div>
                               <div>
                                 <p className="font-medium text-gray-800">
-                                  {user.name}
+                                  {user.username}
                                 </p>
-                                <p className="text-sm text-gray-600 capitalize">
+                                {/* <p className="text-sm text-gray-600 capitalize">
                                   {user.skillLevel}
-                                </p>
+                                </p> */}
                               </div>
                             </div>
                             <button
@@ -293,7 +296,6 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
                     </div>
                   )}
 
-                  {/* Selected Friends */}
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-2">
                       Selected Friends ({selectedFriends.length})
@@ -307,15 +309,12 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                               <span className="text-sm font-medium text-blue-600">
-                                {friend.name.charAt(0)}
+                                {friend.username.charAt(0)}
                               </span>
                             </div>
                             <div>
                               <p className="font-medium text-gray-800">
-                                {friend.name}
-                              </p>
-                              <p className="text-sm text-gray-600 capitalize">
-                                {friend.skillLevel}
+                                {friend.username}
                               </p>
                             </div>
                           </div>
@@ -338,7 +337,6 @@ export const CreateGame: React.FC<CreateGameProps> = ({ currentUserId }) => {
               </div>
             </div>
 
-            {/* Create Game Button */}
             <div className="mt-8 pt-6 border-t border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600">

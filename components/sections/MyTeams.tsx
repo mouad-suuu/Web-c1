@@ -1,6 +1,13 @@
 "use client";
-import { useState } from "react";
-import { TeamHistory, mockTeamHistory, mockGames } from "@/data/mockData";
+import { useState, useEffect } from "react";
+import {
+  TeamHistory,
+  Game,
+  getTeamHistory,
+  getUserGames,
+  getGamesByLeader,
+} from "@/actions/database";
+import { mockTeamHistory, mockGames } from "@/data/mockData";
 
 interface MyTeamsProps {
   currentUserId: string;
@@ -11,26 +18,79 @@ export const MyTeams: React.FC<MyTeamsProps> = ({ currentUserId }) => {
     "history" | "upcoming" | "created"
   >("history");
 
-  // Filter games where current user is participating
-  const upcomingGames = mockGames.filter(
-    (game) =>
-      game.team1.players.some((player) => player.id === currentUserId) ||
-      game.team2.players.some((player) => player.id === currentUserId)
-  );
+  const [teamHistory, setTeamHistory] = useState<TeamHistory[]>([]);
+  const [upcomingGames, setUpcomingGames] = useState<Game[]>([]);
+  const [createdGames, setCreatedGames] = useState<Game[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Filter games created by current user
-  const createdGames = mockGames.filter(
-    (game) => game.leader.id === currentUserId
-  );
+  // Load data from Firebase
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
 
-  const formatDate = (date: Date) => {
+        // Fetch all data in parallel
+        const [history, upcoming, created] = await Promise.all([
+          getTeamHistory(currentUserId),
+          getUserGames(currentUserId),
+          getGamesByLeader(currentUserId),
+        ]);
+
+        // Use mock data as fallback if Firebase data is empty or invalid
+        setTeamHistory(history.length > 0 ? history : (mockTeamHistory as any));
+        setUpcomingGames(
+          upcoming.length > 0
+            ? upcoming
+            : (mockGames.filter(
+                (game) =>
+                  game.team1.players.some(
+                    (player) => player.id === currentUserId
+                  ) ||
+                  game.team2.players.some(
+                    (player) => player.id === currentUserId
+                  )
+              ) as any)
+        );
+        setCreatedGames(
+          created.length > 0
+            ? created
+            : (mockGames.filter(
+                (game) => game.leader.id === currentUserId
+              ) as any)
+        );
+      } catch (err) {
+        console.log("Error fetching from Firebase, using mock data:", err);
+        setTeamHistory(mockTeamHistory as any);
+        setUpcomingGames(
+          mockGames.filter(
+            (game) =>
+              game.team1.players.some(
+                (player) => player.id === currentUserId
+              ) ||
+              game.team2.players.some((player) => player.id === currentUserId)
+          ) as any
+        );
+        setCreatedGames(
+          mockGames.filter((game) => game.leader.id === currentUserId) as any
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [currentUserId]);
+
+  const formatDate = (date: Date | any) => {
+    const dateObj = date.toDate ? date.toDate() : new Date(date);
     return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    }).format(date);
+    }).format(dateObj);
   };
 
   const getResultColor = (result: string) => {
@@ -106,14 +166,42 @@ export const MyTeams: React.FC<MyTeamsProps> = ({ currentUserId }) => {
 
         {/* Tab Content */}
         <div className="max-w-6xl mx-auto">
-          {activeTab === "history" && (
+          {loading && (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">⏳</div>
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                Loading your teams...
+              </h3>
+              <p className="text-gray-500">
+                Please wait while we fetch your data
+              </p>
+            </div>
+          )}
+
+          {error && (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">❌</div>
+              <h3 className="text-xl font-semibold text-red-600 mb-2">
+                Error loading data
+              </h3>
+              <p className="text-gray-500">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Try Again
+              </button>
+            </div>
+          )}
+
+          {!loading && !error && activeTab === "history" && (
             <div className="space-y-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">
                 Game History
               </h3>
-              {mockTeamHistory.length > 0 ? (
+              {teamHistory.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {mockTeamHistory.map((game) => (
+                  {teamHistory.map((game) => (
                     <div
                       key={game.id}
                       className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
@@ -193,7 +281,7 @@ export const MyTeams: React.FC<MyTeamsProps> = ({ currentUserId }) => {
             </div>
           )}
 
-          {activeTab === "upcoming" && (
+          {!loading && !error && activeTab === "upcoming" && (
             <div className="space-y-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">
                 Upcoming Games
@@ -283,7 +371,7 @@ export const MyTeams: React.FC<MyTeamsProps> = ({ currentUserId }) => {
             </div>
           )}
 
-          {activeTab === "created" && (
+          {!loading && !error && activeTab === "created" && (
             <div className="space-y-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">
                 Games I Created

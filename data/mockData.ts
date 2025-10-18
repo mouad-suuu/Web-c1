@@ -6,7 +6,12 @@ export interface User {
   skillLevel: "beginner" | "intermediate" | "advanced";
   favoriteSports: string[];
 }
-
+export interface Sport {
+  id: string;
+  name: string;
+  icon: string;
+  maxPlayers: number;
+}
 export interface Game {
   id: string;
   sport: string;
@@ -22,7 +27,7 @@ export interface Game {
     maxPlayers: number;
   };
   startTime: Date;
-  endTime: Date;
+  period: number;
   location: string;
   status: "waiting" | "in-progress" | "completed" | "cancelled";
   description?: string;
@@ -106,17 +111,17 @@ export const mockGames: Game[] = [
     sport: "Football",
     leader: mockUsers[0],
     team1: {
-      name: "Thunder FC",
+      name: "3wapa",
       players: [mockUsers[0], mockUsers[2]],
       maxPlayers: 5,
     },
     team2: {
-      name: "Lightning United",
+      name: "Lm7sada",
       players: [mockUsers[4]],
       maxPlayers: 5,
     },
     startTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
-    endTime: new Date(Date.now() + 3 * 60 * 60 * 1000), // 4 hours from now
+    period: 2, // 2 hours duration
     location: "City Sports Complex",
     status: "waiting",
     description: "Friendly match for intermediate players",
@@ -136,7 +141,7 @@ export const mockGames: Game[] = [
       maxPlayers: 5,
     },
     startTime: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1 hour from now
-    endTime: new Date(Date.now() + 3 * 60 * 60 * 1000), // 3 hours from now
+    period: 2, // 2 hours duration
     location: "Downtown Basketball Court",
     status: "waiting",
     description: "Competitive game for advanced players",
@@ -156,7 +161,7 @@ export const mockGames: Game[] = [
       maxPlayers: 2,
     },
     startTime: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes from now
-    endTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+    period: 2, // 2 hours duration
     location: "Tennis Club Courts",
     status: "waiting",
     description: "Doubles match - all skill levels welcome",
@@ -176,7 +181,7 @@ export const mockGames: Game[] = [
       maxPlayers: 6,
     },
     startTime: new Date(Date.now() + 3 * 60 * 60 * 1000), // 3 hours from now
-    endTime: new Date(Date.now() + 5 * 60 * 60 * 1000), // 5 hours from now
+    period: 2, // 2 hours duration
     location: "Beach Volleyball Court",
     status: "waiting",
     description: "Beach volleyball - bring sunscreen!",
@@ -189,7 +194,7 @@ export const mockTeamHistory: TeamHistory[] = [
     id: "1",
     gameId: "past1",
     sport: "Football",
-    teamName: "Thunder FC",
+    teamName: "3wapa",
     players: [mockUsers[0], mockUsers[2], mockUsers[4]],
     result: "won",
     date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
@@ -224,4 +229,5 @@ export const sports = [
   { id: "volleyball", name: "Volleyball", icon: "🏐", maxPlayers: 6 },
   { id: "badminton", name: "Badminton", icon: "🏸", maxPlayers: 4 },
   { id: "table-tennis", name: "Table Tennis", icon: "🏓", maxPlayers: 4 },
+  { id: "other", name: "Other", icon: "❓" },
 ];
