@@ -2,6 +2,8 @@
 import { FC, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "./auth/AuthModal";
 
 interface NavItem {
   name: string;
@@ -16,6 +18,8 @@ const NAV_ITEMS: NavItem[] = [
 
 export const Header: FC = () => {
   const [activeSection, setActiveSection] = useState("teams");
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user, userProfile, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -87,14 +91,42 @@ export const Header: FC = () => {
         </nav>
 
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium text-blue-600">A</span>
-          </div>
-          <span className="text-sm font-medium text-gray-700">
-            Ahmed Hassan
-          </span>
+          {user ? (
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium text-blue-600">
+                  {userProfile?.username?.charAt(0) ||
+                    user.email?.charAt(0) ||
+                    "U"}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700">
+                  {userProfile?.username || user.email}
+                </span>
+                <button
+                  onClick={signOut}
+                  className="text-xs text-gray-500 hover:text-gray-700"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </div>
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </header>
   );
 };
